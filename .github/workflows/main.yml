@@ -1,66 +1,52 @@
-name: Epic Free Games Auto Notifier
+name: 🎮 Free Games Auto Notifier
 
 on:
   schedule:
-    - cron: "0 */6 * * *"   # every 6 hours
-  workflow_dispatch:
+    - cron: "0 */6 * * *"   # runs every 6 hours
+  workflow_dispatch:          # allows manual trigger from Actions tab
 
 permissions:
   contents: write
 
 jobs:
-  run-script:
+  notify:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repo
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
+      - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: 📦 Install dependencies
-        run: pip install requests
+        run: pip install requests beautifulsoup4
 
-      - name: 🚀 Run script
+      - name: 🛒 Run Epic Games notifier
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-        run: python epic
+        run: python epic.PY
 
-      - name: 🚀 Run script
+      - name: 🎮 Run Steam notifier
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-        run: python steam.py        
+        run: python steam.py
 
-      # ✅ Commit & push free.txt if changed
-      - name: 📁 Commit & Push free.txt
+      - name: 💾 Commit & push updated state files
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add free.txt
+          git add free.txt free-steam.txt
 
-          # check if there is a change
+          # Only commit if there are actual changes
           git diff --cached --quiet || (
-            git commit -m "🔄 Update free games data"
+            git commit -m "🔄 Update free games state [skip ci]"
             git push
           )
-
-      - name: 📁 Commit & Push free-steam.txt
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-
-          git add free-steam.txt
-
-          # check if there is a change
-          git diff --cached --quiet || (
-            git commit -m "🔄 Update free games data"
-            git push
-          )          
