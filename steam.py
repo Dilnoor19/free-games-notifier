@@ -1,178 +1,230 @@
-import requests
-import smtplib
+import json
 import os
-from bs4 import BeautifulSoup
+import re
+import smtplib
+from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# ================= CONFIG =================
+import requests
+from bs4 import BeautifulSoup
+
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
 TO_EMAIL = os.getenv("TO_EMAIL")
-STATE_FILE = "free-steam.txt"
+STATE_FILE = "free-steam.json"
+LEGACY_STATE_FILE = "free-steam.txt"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0"
-}
-# ==========================================
+HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-# -----------------------------
-# 1. FREE TO KEEP (SCRAPE)
-# -----------------------------
+def clean_text(value):
+    return re.sub(r"\s+", " ", (value or "")).strip()
+
+
+def is_generic_weekend_title(title):
+    return clean_text(title).lower() in {
+        "free weekend",
+        "play for free",
+        "weekend deal",
+        "free to play weekend",
+    }
+
+
+def extract_appid_from_url(url):
+    match = re.search(r"/app/(\d+)", url or "")
+    return match.group(1) if match else None
+
+
+def fetch_app_name(appid):
+    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l=en"
+    response = requests.get(url, headers=HEADERS, timeout=30)
+    response.raise_for_status()
+    data = response.json().get(str(appid), {})
+    if data.get("success"):
+        return clean_text((data.get("data") or {}).get("name"))
+    return ""
+
+
+def resolve_weekend_title(item):
+    for key in ["name", "header", "subheader", "title"]:
+        candidate = clean_text(item.get(key))
+        if candidate and not is_generic_weekend_title(candidate):
+            return candidate
+
+    body = clean_text(item.get("body"))
+    patterns = [
+        r"Play\s+(.+?)\s+for\s+free",
+        r"(.+?)\s+Free Weekend",
+        r"Free Weekend[:\-]?\s*(.+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, body, flags=re.IGNORECASE)
+        if match:
+            title = clean_text(match.group(1))
+            if title and not is_generic_weekend_title(title):
+                return title
+
+    appid = item.get("id") or item.get("appid") or extract_appid_from_url(item.get("url"))
+    if appid:
+        try:
+            app_name = fetch_app_name(appid)
+            if app_name:
+                return app_name
+        except Exception:
+            pass
+
+    return clean_text(item.get("name")) or "Unknown Free Weekend Game"
+
+
 def get_free_to_claim():
-    URL = "https://store.steampowered.com/search/?maxprice=free&specials=1"
-    res = requests.get(URL, headers=HEADERS)
-    soup = BeautifulSoup(res.text, "html.parser")
+    url = "https://store.steampowered.com/search/?maxprice=free&specials=1"
+    response = requests.get(url, headers=HEADERS, timeout=30)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
 
     games = []
-
-    results = soup.find_all("a", class_="search_result_row")
-
-    for game in results:
+    for game in soup.find_all("a", class_="search_result_row"):
         title = game.find("span", class_="title")
         price = game.find("div", class_="discount_final_price")
         discount = game.find("div", class_="discount_pct")
         image = game.find("img")
 
-        if title:
-            price_text = price.text.strip() if price else ""
-            discount_text = discount.text.strip() if discount else ""
+        if not title:
+            continue
 
-            if price_text in ["Free", "₹0"] or "100%" in discount_text:
-                games.append({
+        price_text = clean_text(price.text if price else "")
+        discount_text = clean_text(discount.text if discount else "")
+
+        if price_text in ["Free", "₹0", "$0.00"] or "100%" in discount_text:
+            games.append(
+                {
                     "type": "Free to Keep",
-                    "title": title.text.strip(),
+                    "title": clean_text(title.text),
                     "link": game.get("href"),
                     "image": image["src"] if image else "",
-                    "time": "⏳ Limited Time Offer"
-                })
+                    "time": "Limited Time Offer",
+                }
+            )
 
     return games
 
 
-# -----------------------------
-# 2. FREE WEEKEND (API)
-# -----------------------------
 def get_free_weekend():
     url = "https://store.steampowered.com/api/featuredcategories/"
-    res = requests.get(url, headers=HEADERS)
-    data = res.json()
+    response = requests.get(url, headers=HEADERS, timeout=30)
+    response.raise_for_status()
+    data = response.json()
 
     games = []
-
-    for key in data:
-        section = data[key]
-
+    for section in data.values():
         if isinstance(section, dict) and "items" in section:
             for item in section["items"]:
-                name = item.get("name", "").lower()
-                body = item.get("body", "").lower()
+                name = clean_text(item.get("name")).lower()
+                body = clean_text(item.get("body")).lower()
 
-                if "free weekend" in name or "play for free" in body:
-                    games.append({
-                        "type": "Free Weekend",
-                        "title": item.get("name"),
-                        "link": item.get("url"),
-                        "image": item.get("header_image", ""),
-                        "time": "⏳ Ends Soon (Free Weekend)"
-                    })
+                if "free weekend" in name or "play for free" in body or "free weekend" in body:
+                    games.append(
+                        {
+                            "type": "Free Weekend",
+                            "title": resolve_weekend_title(item),
+                            "link": item.get("url"),
+                            "image": item.get("header_image", ""),
+                            "time": clean_text(item.get("body")) or "Ends Soon (Free Weekend)",
+                        }
+                    )
 
+    unique_games = []
+    seen = set()
+    for game in games:
+        key = (game["title"].lower(), game.get("link") or "")
+        if key not in seen:
+            seen.add(key)
+            unique_games.append(game)
+
+    return unique_games
+
+
+def fetch_games():
+    games = get_free_to_claim() + get_free_weekend()
+    games.sort(key=lambda game: (game["title"].lower(), game["type"].lower()))
     return games
 
 
-# -----------------------------
-# FETCH
-# -----------------------------
-def fetch_games():
-    return get_free_to_claim() + get_free_weekend()
-
-
-# -----------------------------
-# CHANGE DETECTION
-# -----------------------------
 def generate_signature(games):
-    return ",".join(sorted([g["title"] for g in games]))
+    return "|".join(
+        sorted(f"{game['type']}::{game['title']}::{game.get('link', '')}" for game in games)
+    )
 
 
-def has_changed(sig):
-    if not os.path.exists(STATE_FILE):
-        return True
+def load_saved_state():
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        return data if isinstance(data, dict) else {}
 
-    with open(STATE_FILE, "r", encoding="utf-8") as f:
-        return f.read().strip() != sig
+    if os.path.exists(LEGACY_STATE_FILE):
+        with open(LEGACY_STATE_FILE, "r", encoding="utf-8") as file:
+            return {"signature": file.read().strip()}
+
+    return {}
 
 
-def save_signature(sig):
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        f.write(sig)
+def has_changed(signature):
+    return load_saved_state().get("signature") != signature
 
 
-# -----------------------------
-# HTML UI
-# -----------------------------
+def save_state(signature, games):
+    state = {
+        "signature": signature,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "games": games,
+    }
+    with open(STATE_FILE, "w", encoding="utf-8") as file:
+        json.dump(state, file, ensure_ascii=False, indent=2)
+
+
 def build_html(games):
     cards = ""
-
-    for g in games:
-        color = "#22c55e" if g["type"] == "Free to Keep" else "#3b82f6"
-
+    for game in games:
+        color = "#22c55e" if game["type"] == "Free to Keep" else "#3b82f6"
         cards += f"""
         <div style="background:#1e293b;border-radius:15px;padding:20px;margin-bottom:25px;">
-            
-            <h2 style="color:white;text-align:center;">{g['title']}</h2>
-
-            <img src="{g['image']}" style="width:100%;border-radius:12px;">
-
+            <h2 style="color:white;text-align:center;">{game['title']}</h2>
+            <img src="{game['image']}" style="width:100%;border-radius:12px;">
             <p style="text-align:center;color:#cbd5f5;margin-top:10px;">
-                🎯 {g['type']}<br>
-                {g['time']}
+                {game['type']}<br>
+                {game['time']}
             </p>
-
             <div style="text-align:center;margin-top:15px;">
-                <a href="{g['link']}" 
+                <a href="{game['link']}"
                    style="display:inline-block;background:{color};
                    color:white;padding:12px 25px;border-radius:8px;
                    text-decoration:none;font-weight:bold;">
-                    🎮 Open in Steam
+                    Open in Steam
                 </a>
             </div>
-
         </div>
         """
 
-    html = f"""
+    return f"""
     <html>
     <body style="background:#020617;font-family:Arial;padding:20px;">
-        
-        <h1 style="color:#22c55e;text-align:center;">
-            🎮 Steam Free Games
-        </h1>
-
+        <h1 style="color:#22c55e;text-align:center;">Steam Free Games</h1>
         {cards if cards else "<p style='color:white;text-align:center;'>No free games</p>"}
-
-        <p style="color:gray;text-align:center;margin-top:40px;">
-            Auto Steam Notifier ⚡
-        </p>
-
+        <p style="color:gray;text-align:center;margin-top:40px;">Auto Steam Notifier</p>
     </body>
     </html>
     """
 
-    return html
 
-
-# -----------------------------
-# EMAIL
-# -----------------------------
 def send_email(subject, html):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = EMAIL
     msg["To"] = TO_EMAIL
-
     msg.attach(MIMEText(html, "html"))
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -181,22 +233,16 @@ def send_email(subject, html):
         server.send_message(msg)
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
 if __name__ == "__main__":
     games = fetch_games()
-    sig = generate_signature(games)
+    signature = generate_signature(games)
 
-    if not has_changed(sig):
-        print("⏸ No changes")
+    if not has_changed(signature):
+        print("No Steam changes.")
     else:
-        print("🚀 New update!")
-
-        subject = "🔥 Steam Free Games Update"
+        print("New Steam update detected.")
+        subject = "Steam Free Games Update"
         html = build_html(games)
-
         send_email(subject, html)
-        save_signature(sig)
-
-        print("✅ Email sent")
+        save_state(signature, games)
+        print("Email sent and JSON state saved.")
