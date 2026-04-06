@@ -1,9 +1,9 @@
-name: 🎮 Free Games Auto Notifier
+name: Free Games Auto Notifier
 
 on:
   schedule:
-    - cron: "0 */6 * * *"   # runs every 6 hours
-  workflow_dispatch:          # allows manual trigger from Actions tab
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,40 +13,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python 3.11
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: pip install requests beautifulsoup4
 
-      - name: 🛒 Run Epic Games notifier
+      - name: Run Epic Games notifier
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
         run: python epic.PY
 
-      - name: 🎮 Run Steam notifier
+      - name: Run Steam notifier
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
         run: python steam.py
 
-      - name: 💾 Commit & push updated state files
+      - name: Refresh README
+        run: python generate_readme.py
+
+      - name: Commit and push updated files
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add free.txt free-steam.txt
+          git add README.md free.txt free-steam.txt
 
-          # Only commit if there are actual changes
           git diff --cached --quiet || (
-            git commit -m "🔄 Update free games state [skip ci]"
+            git commit -m "Update free games state and README [skip ci]"
             git push
           )
