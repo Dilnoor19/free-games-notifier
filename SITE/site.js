@@ -1,3 +1,6 @@
+const isInSiteFolder = window.location.pathname.includes("/SITE/");
+const dataPrefix = isInSiteFolder ? "../" : "";
+
 async function loadJson(path) {
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) {
@@ -21,10 +24,7 @@ function createGameCard(game, options = {}) {
   card.className = "game-card";
   card.style.animationDelay = `${options.delay || 0}ms`;
 
-  const image = game.image
-    ? `<img src="${game.image}" alt="${game.title}">`
-    : "";
-
+  const image = game.image ? `<img src="${game.image}" alt="${game.title}">` : "";
   const tag = game.type || options.tag || "Offer";
   const details = [];
 
@@ -52,7 +52,6 @@ function createGameCard(game, options = {}) {
 function renderList(containerId, games, options = {}) {
   const container = document.getElementById(containerId);
   if (!container) return;
-
   container.innerHTML = "";
 
   if (!games || games.length === 0) {
@@ -73,8 +72,8 @@ function setText(id, value) {
 async function boot() {
   try {
     const [epic, steam] = await Promise.all([
-      loadJson("free.json"),
-      loadJson("free-steam.json"),
+      loadJson(`${dataPrefix}free.json`),
+      loadJson(`${dataPrefix}free-steam.json`),
     ]);
 
     const epicCurrent = epic.current_games || [];
