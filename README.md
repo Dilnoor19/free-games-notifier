@@ -135,14 +135,14 @@ Then fill `secrets.json` with your local values:
 1. Calls the Epic Games promotions API.
 2. Extracts current and upcoming free games.
 3. Formats dates in IST.
-4. Compares the latest titles with `free.txt`.
+4. Compares the latest titles with `free.json`.
 5. Sends email and optional Telegram alerts only when the lineup changes.
 
 ### `steam.py`
 
 1. Scrapes Steam search results for discounted free offers.
 2. Checks Steam featured categories for free weekend events.
-3. Compares the latest titles with `free-steam.txt`.
+3. Compares the latest titles with `free-steam.json`.
 4. Sends email and optional Telegram alerts only when the lineup changes.
 
 ### `generate_readme.py`
