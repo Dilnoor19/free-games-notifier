@@ -45,8 +45,9 @@ free-games-notifier/
 |-- steam.py
 |-- generate_readme.py
 |-- config.json
-|-- free.txt
-|-- free-steam.txt
+|-- secrets.json
+|-- free.json
+|-- free-steam.json
 `-- .github/
     `-- workflows/
         `-- main.yml
@@ -95,6 +96,35 @@ Use a Gmail App Password, not your normal account password. Telegram is optional
 ```
 
 If a notification type is set to `false`, the scripts will skip it completely and will not require those credentials to be present.
+
+### 5. Optional JSON secrets file
+
+Set this in `config.json`:
+
+```json
+{
+  "secrets": {
+    "use_hardcoded_secrets": true,
+    "secrets_file": "secrets.json"
+  }
+}
+```
+
+Then fill `secrets.json` with your local values:
+
+```json
+{
+  "email": {
+    "email": "you@gmail.com",
+    "password": "your-app-password",
+    "to_email": "recipient@example.com"
+  },
+  "telegram": {
+    "bot_token": "123456:telegram-bot-token",
+    "chat_id": "123456789"
+  }
+}
+```
 
 ---
 

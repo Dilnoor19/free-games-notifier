@@ -12,13 +12,6 @@ from bs4 import BeautifulSoup
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-EMAIL = os.getenv("EMAIL")
-EMAIL = os.getenv("EMAIL") or "mario22623@gmail.com"
-EMAIL = os.getenv("EMAIL")
-PASSWORD = os.getenv("PASSWORD")
-TO_EMAIL = os.getenv("TO_EMAIL")
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 STATE_FILE = "free-steam.json"
 LEGACY_STATE_FILE = "free-steam.txt"
 CONFIG_FILE = "config.json"
@@ -28,6 +21,10 @@ HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 def load_config():
     default_config = {
+        "secrets": {
+            "use_hardcoded_secrets": False,
+            "secrets_file": "secrets.json",
+        },
         "notifications": {
             "email": True,
             "telegram": True,
@@ -43,8 +40,13 @@ def load_config():
     except Exception:
         return default_config
 
+    secrets = data.get("secrets", {})
     notifications = data.get("notifications", {})
     return {
+        "secrets": {
+            "use_hardcoded_secrets": bool(secrets.get("use_hardcoded_secrets", False)),
+            "secrets_file": str(secrets.get("secrets_file", "secrets.json")),
+        },
         "notifications": {
             "email": bool(notifications.get("email", True)),
             "telegram": bool(notifications.get("telegram", True)),
@@ -53,7 +55,42 @@ def load_config():
 
 
 CONFIG = load_config()
- 
+
+
+def load_secrets():
+    if CONFIG["secrets"]["use_hardcoded_secrets"]:
+        secrets_file = CONFIG["secrets"]["secrets_file"]
+        try:
+            with open(secrets_file, "r", encoding="utf-8") as file:
+                data = json.load(file)
+        except Exception:
+            data = {}
+
+        email_data = data.get("email", {})
+        telegram_data = data.get("telegram", {})
+        return {
+            "EMAIL": str(email_data.get("email", "")),
+            "PASSWORD": str(email_data.get("password", "")),
+            "TO_EMAIL": str(email_data.get("to_email", "")),
+            "TELEGRAM_BOT_TOKEN": str(telegram_data.get("bot_token", "")),
+            "TELEGRAM_CHAT_ID": str(telegram_data.get("chat_id", "")),
+        }
+
+    return {
+        "EMAIL": os.getenv("EMAIL", ""),
+        "PASSWORD": os.getenv("PASSWORD", ""),
+        "TO_EMAIL": os.getenv("TO_EMAIL", ""),
+        "TELEGRAM_BOT_TOKEN": os.getenv("TELEGRAM_BOT_TOKEN", ""),
+        "TELEGRAM_CHAT_ID": os.getenv("TELEGRAM_CHAT_ID", ""),
+    }
+
+
+SECRETS = load_secrets()
+EMAIL = SECRETS["EMAIL"]
+PASSWORD = SECRETS["PASSWORD"]
+TO_EMAIL = SECRETS["TO_EMAIL"]
+TELEGRAM_BOT_TOKEN = SECRETS["TELEGRAM_BOT_TOKEN"]
+TELEGRAM_CHAT_ID = SECRETS["TELEGRAM_CHAT_ID"]
 
 def clean_text(value):
     return re.sub(r"\s+", " ", (value or "")).strip()

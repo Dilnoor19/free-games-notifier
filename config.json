@@ -1,6 +1,10 @@
 {
+  "secrets": {
+    "use_hardcoded_secrets": false,
+    "secrets_file": "secrets.json"
+  },
   "notifications": {
-    "email": true, 
+    "email": true,
     "telegram": true
   }
 }
