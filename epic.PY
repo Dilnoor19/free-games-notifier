@@ -4,6 +4,7 @@ import smtplib
 from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from html import escape
 
 import requests
 
@@ -168,9 +169,12 @@ def generate_signature(current_games, upcoming_games):
 
 def load_saved_state():
     if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r", encoding="utf-8") as file:
-            data = json.load(file)
-        return data if isinstance(data, dict) else {}
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as file:
+                data = json.load(file)
+            return data if isinstance(data, dict) else {}
+        except (json.JSONDecodeError, OSError):
+            return {}
 
     if os.path.exists(LEGACY_STATE_FILE):
         with open(LEGACY_STATE_FILE, "r", encoding="utf-8") as file:
@@ -266,33 +270,28 @@ def send_email(subject, html):
         server.send_message(msg)
 
 
-def build_telegram_message(current_games, upcoming_games):
-    lines = ["Epic Free Games Update", ""]
-
-    if current_games:
-        lines.append("Free now:")
-        for game in current_games:
-            lines.append(f"- {game['title']}")
-            lines.append(f"  Ends: {game['end']}")
-            lines.append(f"  {game['link']}")
-    else:
-        lines.append("Free now: None")
-
-    lines.append("")
-
-    if upcoming_games:
-        lines.append("Upcoming:")
-        for game in upcoming_games:
-            lines.append(f"- {game['title']}")
-            lines.append(f"  Starts: {game['start']}")
-            lines.append(f"  {game['link']}")
-    else:
-        lines.append("Upcoming: None")
-
-    return "\n".join(lines)
+def build_telegram_summary(current_games, upcoming_games):
+    summary = ["<b>Epic Free Games Update</b>", ""]
+    summary.append(f"<b>Free now:</b> {len(current_games)}")
+    summary.append(f"<b>Upcoming:</b> {len(upcoming_games)}")
+    return "\n".join(summary)
 
 
-def send_telegram_message(message):
+def build_telegram_game_caption(game, label):
+    title = escape(game["title"])
+    link = escape(game["link"])
+    start = escape(game.get("start", "N/A"))
+    end = escape(game.get("end", "N/A"))
+    return (
+        f"<b>{escape(label)}</b>\n"
+        f"<a href=\"{link}\">{title}</a>\n"
+        f"<b>Start:</b> {start}\n"
+        f"<b>End:</b> {end}\n"
+        f"<a href=\"{link}\">Click here to open the store page</a>"
+    )
+
+
+def send_telegram_text(message):
     if not CONFIG["notifications"]["telegram"]:
         return
 
@@ -306,10 +305,50 @@ def send_telegram_message(message):
             "chat_id": TELEGRAM_CHAT_ID,
             "text": message,
             "disable_web_page_preview": False,
+            "parse_mode": "HTML",
         },
         timeout=30,
     )
     response.raise_for_status()
+
+
+def send_telegram_photo(photo_url, caption):
+    if not CONFIG["notifications"]["telegram"]:
+        return
+
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+    response = requests.post(
+        url,
+        data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "photo": photo_url,
+            "caption": caption[:1024],
+            "parse_mode": "HTML",
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+
+
+def send_telegram_notifications(current_games, upcoming_games):
+    send_telegram_text(build_telegram_summary(current_games, upcoming_games))
+
+    for game in current_games:
+        caption = build_telegram_game_caption(game, "Epic Free Now")
+        if game.get("image"):
+            send_telegram_photo(game["image"], caption)
+        else:
+            send_telegram_text(caption)
+
+    for game in upcoming_games:
+        caption = build_telegram_game_caption(game, "Epic Upcoming")
+        if game.get("image"):
+            send_telegram_photo(game["image"], caption)
+        else:
+            send_telegram_text(caption)
 
 
 if __name__ == "__main__":
@@ -324,8 +363,7 @@ if __name__ == "__main__":
         upcoming_titles = ", ".join(game["title"] for game in upcoming_games) or "TBA"
         subject = f"Free Now: {current_titles} | Next: {upcoming_titles}"
         html = build_html(current_games, upcoming_games)
-        telegram_message = build_telegram_message(current_games, upcoming_games)
         send_email(subject, html)
-        send_telegram_message(telegram_message)
+        send_telegram_notifications(current_games, upcoming_games)
         save_state(signature, current_games, upcoming_games)
         print("Notifications sent and JSON state saved.")

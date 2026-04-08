@@ -5,12 +5,15 @@ import smtplib
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from html import escape
 
 import requests
 from bs4 import BeautifulSoup
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
+EMAIL = os.getenv("EMAIL")
+EMAIL = os.getenv("EMAIL") or "mario22623@gmail.com"
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
 TO_EMAIL = os.getenv("TO_EMAIL")
@@ -271,24 +274,24 @@ def send_email(subject, html):
         server.send_message(msg)
 
 
-def build_telegram_message(games):
-    lines = ["Steam Free Games Update", ""]
-
-    if not games:
-        lines.append("No Steam offers found.")
-        return "\n".join(lines)
-
-    for game in games:
-        lines.append(f"- {game['title']} ({game['type']})")
-        if game.get("time"):
-            lines.append(f"  {game['time']}")
-        if game.get("link"):
-            lines.append(f"  {game['link']}")
-
-    return "\n".join(lines)
+def build_telegram_summary(games):
+    return f"<b>Steam Free Games Update</b>\n\n<b>Total offers:</b> {len(games)}"
 
 
-def send_telegram_message(message):
+def build_telegram_game_caption(game):
+    title = escape(game["title"])
+    offer_type = escape(game.get("type", "Offer"))
+    time_text = escape(game.get("time", "Limited time"))
+    link = escape(game.get("link", "https://store.steampowered.com/"))
+    return (
+        f"<b>{offer_type}</b>\n"
+        f"<a href=\"{link}\">{title}</a>\n"
+        f"<b>Details:</b> {time_text}\n"
+        f"<a href=\"{link}\">Click here to open the store page</a>"
+    )
+
+
+def send_telegram_text(message):
     if not CONFIG["notifications"]["telegram"]:
         return
 
@@ -302,10 +305,43 @@ def send_telegram_message(message):
             "chat_id": TELEGRAM_CHAT_ID,
             "text": message,
             "disable_web_page_preview": False,
+            "parse_mode": "HTML",
         },
         timeout=30,
     )
     response.raise_for_status()
+
+
+def send_telegram_photo(photo_url, caption):
+    if not CONFIG["notifications"]["telegram"]:
+        return
+
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+    response = requests.post(
+        url,
+        data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "photo": photo_url,
+            "caption": caption[:1024],
+            "parse_mode": "HTML",
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+
+
+def send_telegram_notifications(games):
+    send_telegram_text(build_telegram_summary(games))
+
+    for game in games:
+        caption = build_telegram_game_caption(game)
+        if game.get("image"):
+            send_telegram_photo(game["image"], caption)
+        else:
+            send_telegram_text(caption)
 
 
 if __name__ == "__main__":
@@ -318,8 +354,7 @@ if __name__ == "__main__":
         print("New Steam update detected.")
         subject = "Steam Free Games Update"
         html = build_html(games)
-        telegram_message = build_telegram_message(games)
         send_email(subject, html)
-        send_telegram_message(telegram_message)
+        send_telegram_notifications(games)
         save_state(signature, games)
         print("Notifications sent and JSON state saved.")
