@@ -1,13 +1,13 @@
 {
-  "signature": "CURRENT:Clone Drone in the Danger Zone,TOMAK: Save the Earth Regeneration|UPCOMING:Prop Sumo",
-  "updated_at": "2026-04-08T16:27:46.195357+00:00",
+  "signature": "CURRENT:Prop Sumo,TOMAK: Save the Earth Regeneration|UPCOMING:The Stone of Madness",
+  "updated_at": "2026-04-09T19:02:46.856285+00:00",
   "current_games": [
     {
-      "title": "Clone Drone in the Danger Zone",
-      "image": "https://cdn1.epicgames.com/spt-assets/2300be8843b24d9a8abaa663a2b544f8/clone-drone-in-the-danger-zone-1cmlu.png",
-      "link": "https://store.epicgames.com/en-US/p/clone-drone-in-the-danger-zone-4daf6e",
-      "start": "02 Apr 2026, 08:30 PM IST",
-      "end": "09 Apr 2026, 08:30 PM IST"
+      "title": "Prop Sumo",
+      "image": "https://cdn1.epicgames.com/spt-assets/a965174568cb492ca3ebbe7a95886261/propsumo-1inog.jpg",
+      "link": "https://store.epicgames.com/en-US/p/propsumo-ca8bd7",
+      "start": "09 Apr 2026, 08:30 PM IST",
+      "end": "16 Apr 2026, 08:30 PM IST"
     },
     {
       "title": "TOMAK: Save the Earth Regeneration",
@@ -19,11 +19,11 @@
   ],
   "upcoming_games": [
     {
-      "title": "Prop Sumo",
-      "image": "https://cdn1.epicgames.com/spt-assets/a965174568cb492ca3ebbe7a95886261/propsumo-1inog.jpg",
-      "link": "https://store.epicgames.com/en-US/p/propsumo-ca8bd7",
-      "start": "09 Apr 2026, 08:30 PM IST",
-      "end": "16 Apr 2026, 08:30 PM IST"
+      "title": "The Stone of Madness",
+      "image": "https://cdn1.epicgames.com/spt-assets/8de621e8d91b473f892472024035dc22/the-stone-of-madness-hvdla.jpg",
+      "link": "https://store.epicgames.com/en-US/p/the-stone-of-madness-7b22f3",
+      "start": "16 Apr 2026, 08:30 PM IST",
+      "end": "23 Apr 2026, 08:30 PM IST"
     }
   ]
 }
