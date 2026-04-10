@@ -6,6 +6,7 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-Automated-success?logo=github-actions&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Schedule](https://img.shields.io/badge/Runs%20Every-6%20Hours-orange?logo=clockify&logoColor=white)
+![Discord](https://img.shields.io/badge/Discord-Bot-5865F2?logo=discord&logoColor=white)
 
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
@@ -30,8 +31,10 @@ Source: Epic fallback from saved state, Steam live data
 
 - Epic Games support for current and upcoming free promotions
 - Steam support for free-to-keep deals and free weekend events
-- HTML email and Telegram notifications
-- Change detection to avoid duplicate emails
+- HTML email notifications
+- Telegram bot notifications with per-game photo cards
+- **Discord bot notifications with rich embeds** (title, image, dates, store link)
+- Change detection to avoid duplicate notifications
 - Automatic README refresh on every scheduled workflow run
 - GitHub Actions automation every 6 hours
 
@@ -78,11 +81,13 @@ Create these repository secrets in `Settings -> Secrets and variables -> Actions
 |-------------|-------------|
 | `EMAIL` | Sender Gmail address |
 | `PASSWORD` | Gmail App Password |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token from BotFather |
-| `TELEGRAM_CHAT_ID` | Telegram user, group, or channel chat id |
 | `TO_EMAIL` | Recipient email address |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token from BotFather |
+| `TELEGRAM_CHAT_ID` | Telegram user, group, or channel chat ID |
+| `DISCORD_BOT_TOKEN` | Discord bot token from the Developer Portal |
+| `DISCORD_CHANNEL_ID` | ID of the Discord channel to post in |
 
-Use a Gmail App Password, not your normal account password. Telegram is optional, but if you set both Telegram secrets the workflow will send bot messages too.
+Use a Gmail App Password, not your normal account password. Each notification type is independent — you can enable only the ones you need via `config.json`.
 
 ### 4. Control notification types with `config.json`
 
@@ -90,12 +95,13 @@ Use a Gmail App Password, not your normal account password. Telegram is optional
 {
   "notifications": {
     "email": true,
-    "telegram": false
+    "telegram": true,
+    "discord": true
   }
 }
 ```
 
-If a notification type is set to `false`, the scripts will skip it completely and will not require those credentials to be present.
+Set any value to `false` to skip that channel entirely — no credentials required for disabled channels.
 
 ### 5. Optional JSON secrets file
 
@@ -122,6 +128,10 @@ Then fill `secrets.json` with your local values:
   "telegram": {
     "bot_token": "123456:telegram-bot-token",
     "chat_id": "123456789"
+  },
+  "discord": {
+    "bot_token": "YOUR_DISCORD_BOT_TOKEN",
+    "channel_id": "YOUR_CHANNEL_ID"
   }
 }
 ```
@@ -136,14 +146,21 @@ Then fill `secrets.json` with your local values:
 2. Extracts current and upcoming free games.
 3. Formats dates in IST.
 4. Compares the latest titles with `free.json`.
-5. Sends email and optional Telegram alerts only when the lineup changes.
+5. Sends email, Telegram, and/or Discord alerts only when the lineup changes.
 
 ### `steam.py`
 
 1. Scrapes Steam search results for discounted free offers.
 2. Checks Steam featured categories for free weekend events.
 3. Compares the latest titles with `free-steam.json`.
-4. Sends email and optional Telegram alerts only when the lineup changes.
+4. Sends email, Telegram, and/or Discord alerts only when the lineup changes.
+
+#### Discord notifications
+
+Both scripts post to Discord via the REST API (`POST /channels/{id}/messages`) using a bot token. Each run sends:
+
+- A **summary message** with the total count of free games.
+- One **rich embed per game** containing the title (linked to the store page), cover image, and relevant dates or offer type — colour-coded by category.
 
 ### `generate_readme.py`
 
@@ -175,9 +192,11 @@ Each run:
 ```powershell
 $env:EMAIL="you@gmail.com"
 $env:PASSWORD="your-app-password"
+$env:TO_EMAIL="recipient@example.com"
 $env:TELEGRAM_BOT_TOKEN="123456:telegram-bot-token"
 $env:TELEGRAM_CHAT_ID="123456789"
-$env:TO_EMAIL="recipient@example.com"
+$env:DISCORD_BOT_TOKEN="your-discord-bot-token"
+$env:DISCORD_CHANNEL_ID="your-channel-id"
 
 python epic.PY
 python steam.py

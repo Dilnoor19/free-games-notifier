@@ -28,6 +28,7 @@ def load_config():
         "notifications": {
             "email": True,
             "telegram": True,
+            "discord": True,
         }
     }
 
@@ -50,6 +51,7 @@ def load_config():
         "notifications": {
             "email": bool(notifications.get("email", True)),
             "telegram": bool(notifications.get("telegram", True)),
+            "discord": bool(notifications.get("discord", True)),
         }
     }
 
@@ -68,12 +70,15 @@ def load_secrets():
 
         email_data = data.get("email", {})
         telegram_data = data.get("telegram", {})
+        discord_data = data.get("discord", {})
         return {
             "EMAIL": str(email_data.get("email", "")),
             "PASSWORD": str(email_data.get("password", "")),
             "TO_EMAIL": str(email_data.get("to_email", "")),
             "TELEGRAM_BOT_TOKEN": str(telegram_data.get("bot_token", "")),
             "TELEGRAM_CHAT_ID": str(telegram_data.get("chat_id", "")),
+            "DISCORD_BOT_TOKEN": str(discord_data.get("bot_token", "")),
+            "DISCORD_CHANNEL_ID": str(discord_data.get("channel_id", "")),
         }
 
     return {
@@ -82,6 +87,8 @@ def load_secrets():
         "TO_EMAIL": os.getenv("TO_EMAIL", ""),
         "TELEGRAM_BOT_TOKEN": os.getenv("TELEGRAM_BOT_TOKEN", ""),
         "TELEGRAM_CHAT_ID": os.getenv("TELEGRAM_CHAT_ID", ""),
+        "DISCORD_BOT_TOKEN": os.getenv("DISCORD_BOT_TOKEN", ""),
+        "DISCORD_CHANNEL_ID": os.getenv("DISCORD_CHANNEL_ID", ""),
     }
 
 
@@ -91,6 +98,8 @@ PASSWORD = SECRETS["PASSWORD"]
 TO_EMAIL = SECRETS["TO_EMAIL"]
 TELEGRAM_BOT_TOKEN = SECRETS["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = SECRETS["TELEGRAM_CHAT_ID"]
+DISCORD_BOT_TOKEN = SECRETS["DISCORD_BOT_TOKEN"]
+DISCORD_CHANNEL_ID = SECRETS["DISCORD_CHANNEL_ID"]
 
 def clean_text(value):
     return re.sub(r"\s+", " ", (value or "")).strip()
@@ -381,6 +390,57 @@ def send_telegram_notifications(games):
             send_telegram_text(caption)
 
 
+# ── Discord ──────────────────────────────────────────────────────────────────
+
+DISCORD_API = "https://discord.com/api/v10/channels/{channel_id}/messages"
+
+
+def _discord_post(payload):
+    """POST one message to the configured Discord channel."""
+    if not DISCORD_BOT_TOKEN or not DISCORD_CHANNEL_ID:
+        return
+    url = DISCORD_API.format(channel_id=DISCORD_CHANNEL_ID)
+    headers = {
+        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+
+
+def build_discord_game_embed(game):
+    offer_type = game.get("type", "Offer")
+    colour = 0x22C55E if offer_type == "Free to Keep" else 0x3B82F6
+    embed = {
+        "title": game["title"],
+        "url": game.get("link", "https://store.steampowered.com/"),
+        "color": colour,
+        "fields": [
+            {"name": "Type",    "value": offer_type,                  "inline": True},
+            {"name": "Details", "value": game.get("time", "N/A"),     "inline": True},
+        ],
+        "footer": {"text": "Steam Free Games Notifier"},
+    }
+    if game.get("image"):
+        embed["image"] = {"url": game["image"]}
+    return embed
+
+
+def send_discord_notifications(games):
+    if not CONFIG["notifications"]["discord"]:
+        return
+
+    if not DISCORD_BOT_TOKEN or not DISCORD_CHANNEL_ID:
+        return
+
+    # Summary message
+    _discord_post({"content": f"🎮 **Steam Free Games Update**\n📦 **Total offers:** {len(games)}"})
+
+    # One embed per game
+    for game in games:
+        _discord_post({"embeds": [build_discord_game_embed(game)]})
+
+
 if __name__ == "__main__":
     games = fetch_games()
     signature = generate_signature(games)
@@ -393,5 +453,6 @@ if __name__ == "__main__":
         html = build_html(games)
         send_email(subject, html)
         send_telegram_notifications(games)
+        send_discord_notifications(games)
         save_state(signature, games)
         print("Notifications sent and JSON state saved.")

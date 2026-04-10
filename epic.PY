@@ -25,6 +25,7 @@ def load_config():
         "notifications": {
             "email": True,
             "telegram": True,
+            "discord": True,
         }
     }
 
@@ -47,6 +48,7 @@ def load_config():
         "notifications": {
             "email": bool(notifications.get("email", True)),
             "telegram": bool(notifications.get("telegram", True)),
+            "discord": bool(notifications.get("discord", True)),
         }
     }
 
@@ -65,12 +67,15 @@ def load_secrets():
 
         email_data = data.get("email", {})
         telegram_data = data.get("telegram", {})
+        discord_data = data.get("discord", {})
         return {
             "EMAIL": str(email_data.get("email", "")),
             "PASSWORD": str(email_data.get("password", "")),
             "TO_EMAIL": str(email_data.get("to_email", "")),
             "TELEGRAM_BOT_TOKEN": str(telegram_data.get("bot_token", "")),
             "TELEGRAM_CHAT_ID": str(telegram_data.get("chat_id", "")),
+            "DISCORD_BOT_TOKEN": str(discord_data.get("bot_token", "")),
+            "DISCORD_CHANNEL_ID": str(discord_data.get("channel_id", "")),
         }
 
     return {
@@ -79,6 +84,8 @@ def load_secrets():
         "TO_EMAIL": os.getenv("TO_EMAIL", ""),
         "TELEGRAM_BOT_TOKEN": os.getenv("TELEGRAM_BOT_TOKEN", ""),
         "TELEGRAM_CHAT_ID": os.getenv("TELEGRAM_CHAT_ID", ""),
+        "DISCORD_BOT_TOKEN": os.getenv("DISCORD_BOT_TOKEN", ""),
+        "DISCORD_CHANNEL_ID": os.getenv("DISCORD_CHANNEL_ID", ""),
     }
 
 
@@ -88,6 +95,8 @@ PASSWORD = SECRETS["PASSWORD"]
 TO_EMAIL = SECRETS["TO_EMAIL"]
 TELEGRAM_BOT_TOKEN = SECRETS["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID = SECRETS["TELEGRAM_CHAT_ID"]
+DISCORD_BOT_TOKEN = SECRETS["DISCORD_BOT_TOKEN"]
+DISCORD_CHANNEL_ID = SECRETS["DISCORD_CHANNEL_ID"]
 
 
 def format_date_ist(date_str):
@@ -391,6 +400,66 @@ def send_telegram_notifications(current_games, upcoming_games):
             send_telegram_text(caption)
 
 
+# ── Discord ──────────────────────────────────────────────────────────────────
+
+DISCORD_API = "https://discord.com/api/v10/channels/{channel_id}/messages"
+
+
+def _discord_post(payload):
+    """POST one message to the configured Discord channel."""
+    if not DISCORD_BOT_TOKEN or not DISCORD_CHANNEL_ID:
+        return
+    url = DISCORD_API.format(channel_id=DISCORD_CHANNEL_ID)
+    headers = {
+        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+
+
+def build_discord_game_embed(game, label, colour):
+    embed = {
+        "title": game["title"],
+        "url": game["link"],
+        "color": colour,
+        "fields": [
+            {"name": "Start", "value": game.get("start", "N/A"), "inline": True},
+            {"name": "End",   "value": game.get("end", "N/A"),   "inline": True},
+        ],
+        "footer": {"text": label},
+    }
+    if game.get("image"):
+        embed["image"] = {"url": game["image"]}
+    return embed
+
+
+def send_discord_notifications(current_games, upcoming_games):
+    if not CONFIG["notifications"]["discord"]:
+        return
+
+    if not DISCORD_BOT_TOKEN or not DISCORD_CHANNEL_ID:
+        return
+
+    # Summary message
+    summary_lines = [
+        "**🎮 Epic Free Games Update**",
+        f"🟢 **Free now:** {len(current_games)}",
+        f"🟡 **Upcoming:** {len(upcoming_games)}",
+    ]
+    _discord_post({"content": "\n".join(summary_lines)})
+
+    # One embed per current game  (colour: green 0x22c55e)
+    for game in current_games:
+        embed = build_discord_game_embed(game, "\ud83d\udfe2 Epic Free Now", 0x22C55E)
+        _discord_post({"embeds": [embed]})
+
+    # One embed per upcoming game  (colour: yellow 0xfacc15)
+    for game in upcoming_games:
+        embed = build_discord_game_embed(game, "\ud83d\udfe1 Epic Upcoming", 0xFACC15)
+        _discord_post({"embeds": [embed]})
+
+
 if __name__ == "__main__":
     current_games, upcoming_games = fetch_games()
     signature = generate_signature(current_games, upcoming_games)
@@ -398,12 +467,13 @@ if __name__ == "__main__":
     if not has_changed(signature):
         print("No changes. Email not sent.")
     else:
-        print("New Epic update detected. Sending email...")
+        print("New Epic update detected. Sending notifications...")
         current_titles = ", ".join(game["title"] for game in current_games) or "None"
         upcoming_titles = ", ".join(game["title"] for game in upcoming_games) or "TBA"
         subject = f"Free Now: {current_titles} | Next: {upcoming_titles}"
         html = build_html(current_games, upcoming_games)
         send_email(subject, html)
         send_telegram_notifications(current_games, upcoming_games)
+        send_discord_notifications(current_games, upcoming_games)
         save_state(signature, current_games, upcoming_games)
         print("Notifications sent and JSON state saved.")
