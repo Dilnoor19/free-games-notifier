@@ -6,6 +6,7 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-Automated-success?logo=github-actions&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Schedule](https://img.shields.io/badge/Runs%20Every-6%20Hours-orange?logo=clockify&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?logo=telegram&logoColor=white)
 ![Discord](https://img.shields.io/badge/Discord-Bot-5865F2?logo=discord&logoColor=white)
 
 <!-- README_AUTO_SECTION:START -->
@@ -52,6 +53,11 @@ free-games-notifier/
 |-- secrets.json
 |-- free.json
 |-- free-steam.json
+|-- index.html
+|-- SITE/
+|   |-- docs.html
+|   |-- site.css
+|   `-- site.js
 `-- .github/
     `-- workflows/
         `-- main.yml
@@ -84,9 +90,9 @@ Create these repository secrets in `Settings -> Secrets and variables -> Actions
 | `PASSWORD` | Gmail App Password |
 | `TO_EMAIL` | Recipient email address |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token from BotFather |
-| `TELEGRAM_CHAT_ID` | Telegram user, group, or channel chat ID |
+| `TELEGRAM_CHAT_ID` | Telegram chat ID or comma-separated chat IDs |
 | `DISCORD_BOT_TOKEN` | Discord bot token from the Developer Portal |
-| `DISCORD_CHANNEL_ID` | ID of the Discord channel to post in |
+| `DISCORD_CHANNEL_ID` | Discord channel ID or comma-separated channel IDs |
 
 Use a Gmail App Password, not your normal account password. Each notification type is independent — you can enable only the ones you need via `config.json`.
 
@@ -94,6 +100,10 @@ Use a Gmail App Password, not your normal account password. Each notification ty
 
 ```json
 {
+  "secrets": {
+    "use_hardcoded_secrets": false,
+    "secrets_file": "secrets.json"
+  },
   "notifications": {
     "email": true,
     "telegram": true,
@@ -137,6 +147,8 @@ Then fill `secrets.json` with your local values:
 }
 ```
 
+Both Telegram and Discord support multiple targets separated by commas.
+
 ---
 
 ## How It Works
@@ -146,14 +158,14 @@ Then fill `secrets.json` with your local values:
 1. Calls the Epic Games promotions API.
 2. Extracts current and upcoming free games.
 3. Formats dates in IST.
-4. Compares the latest titles with `free.json`.
+4. Compares the latest JSON snapshot with `free.json`.
 5. Sends email, Telegram, and/or Discord alerts only when the lineup changes.
 
 ### `steam.py`
 
 1. Scrapes Steam search results for discounted free offers.
 2. Checks Steam featured categories for free weekend events.
-3. Compares the latest titles with `free-steam.json`.
+3. Compares the latest JSON snapshot with `free-steam.json`.
 4. Sends email, Telegram, and/or Discord alerts only when the lineup changes.
 
 #### Discord notifications
@@ -162,6 +174,14 @@ Both scripts post to Discord via the REST API (`POST /channels/{id}/messages`) u
 
 - A **summary message** with the total count of free games.
 - One **rich embed per game** containing the title (linked to the store page), cover image, and relevant dates or offer type — colour-coded by category.
+
+#### Telegram notifications
+
+Both scripts send Telegram updates using the Bot API. Each run sends:
+
+- A short **summary message**.
+- One **formatted message or photo card per game** with clickable links.
+- Delivery to one or many chats when `chat_id` contains comma-separated values.
 
 ### `generate_readme.py`
 
@@ -210,7 +230,7 @@ python generate_readme.py
 
 - Credentials are never committed to the repository.
 - Secrets are injected at runtime through GitHub Actions.
-- State files only store game-title signatures.
+- State files are JSON snapshots containing signatures plus game metadata like title, link, image, dates, and offer type.
 
 ---
 
