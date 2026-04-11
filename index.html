@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Free Games Tracker</title>
   <meta name="description" content="Track current Epic Games and Steam freebies from JSON data published in this repository.">
+  <script>
+    (() => {
+      const savedTheme = localStorage.getItem("site-theme");
+      document.documentElement.dataset.theme = savedTheme || "light";
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -19,6 +25,7 @@
     <nav class="nav">
       <a class="nav-link active" href="index.html">Games</a>
       <a class="nav-link" href="SITE/docs.html">Docs</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">Dark mode</button>
     </nav>
   </header>
 

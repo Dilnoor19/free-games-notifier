@@ -1,5 +1,30 @@
 const isInSiteFolder = window.location.pathname.includes("/SITE/");
 const dataPrefix = isInSiteFolder ? "../" : "";
+const themeStorageKey = "site-theme";
+
+function getCurrentTheme() {
+  return document.documentElement.dataset.theme || "light";
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem(themeStorageKey, theme);
+  const toggle = document.getElementById("theme-toggle");
+  if (toggle) {
+    toggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    toggle.setAttribute("aria-pressed", String(theme === "dark"));
+  }
+}
+
+function initializeThemeToggle() {
+  const toggle = document.getElementById("theme-toggle");
+  if (!toggle) return;
+
+  applyTheme(getCurrentTheme());
+  toggle.addEventListener("click", () => {
+    applyTheme(getCurrentTheme() === "dark" ? "light" : "dark");
+  });
+}
 
 async function loadJson(path) {
   const response = await fetch(path, { cache: "no-store" });
@@ -69,7 +94,47 @@ function setText(id, value) {
   if (element) element.textContent = value;
 }
 
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function highlightJson(text) {
+  const escaped = escapeHtml(text);
+  return escaped
+    .replace(/(&quot;[^"\n]*&quot;)(\s*:)/g, '<span class="tok-property">$1</span><span class="tok-operator">$2</span>')
+    .replace(/:\s*(&quot;[^"\n]*&quot;)/g, ': <span class="tok-string">$1</span>')
+    .replace(/\b(true|false|null)\b/g, '<span class="tok-boolean">$1</span>')
+    .replace(/(?<![\w>.-])(-?\d+(?:\.\d+)?)(?![\w<])/g, '<span class="tok-number">$1</span>');
+}
+
+function highlightPowerShell(text) {
+  let escaped = escapeHtml(text);
+  escaped = escaped.replace(/(^|\n)(python|pip)\b/g, '$1<span class="tok-command">$2</span>');
+  escaped = escaped.replace(/(\$env:[A-Z_]+)/g, '<span class="tok-variable">$1</span>');
+  escaped = escaped.replace(/(&quot;[^"\n]*&quot;)/g, '<span class="tok-string">$1</span>');
+  return escaped;
+}
+
+function highlightCodeBlocks() {
+  document.querySelectorAll("code.language-json, code.language-powershell").forEach((block) => {
+    const source = block.textContent || "";
+    if (block.classList.contains("language-json")) {
+      block.innerHTML = highlightJson(source);
+      return;
+    }
+    if (block.classList.contains("language-powershell")) {
+      block.innerHTML = highlightPowerShell(source);
+    }
+  });
+}
+
 async function boot() {
+  initializeThemeToggle();
+  highlightCodeBlocks();
+
   try {
     const [epic, steam] = await Promise.all([
       loadJson(`${dataPrefix}free.json`),
