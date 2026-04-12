@@ -5,7 +5,7 @@
   },
   "notifications": {
     "email": true,
-    "telegram": true,
-    "discord": true
+    "telegram": false,
+    "discord": false
   }
 }

@@ -153,16 +153,17 @@ free-steam.json
 }</code></pre>
           </div>
           <p>
-            Telegram and Discord both support multiple targets separated by commas. For example:
-            <code>-1003918180986,1845799450</code> for Telegram chat IDs or
-            <code>123456789012345678,987654321098765432</code> for Discord channel IDs.
+            Email, Telegram, and Discord all support multiple targets separated by commas. Email supports up to
+            30 recipients per run, for example <code>first@example.com,second@example.com</code>. Telegram and
+            Discord support comma-separated chat or channel IDs like <code>-1003918180986,1845799450</code> and
+            <code>123456789012345678,987654321098765432</code>.
           </p>
           <div class="code-card">
             <pre class="code-window"><code class="language-json">{
   "email": {
     "email": "you@gmail.com",
     "password": "your-app-password",
-    "to_email": "recipient@example.com"
+    "to_email": "first@example.com,second@example.com,third@example.com"
   },
   "telegram": {
     "bot_token": "123456:telegram-bot-token",
@@ -203,7 +204,7 @@ free-steam.json
 
 $env:EMAIL="you@example.com"
 $env:PASSWORD="your-app-password"
-$env:TO_EMAIL="recipient@example.com"
+$env:TO_EMAIL="first@example.com,second@example.com"
 $env:TELEGRAM_BOT_TOKEN="123456:telegram-bot-token"
 $env:TELEGRAM_CHAT_ID="-1003918180986,1845799450"
 $env:DISCORD_BOT_TOKEN="your-discord-bot-token"

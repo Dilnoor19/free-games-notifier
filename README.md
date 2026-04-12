@@ -89,7 +89,7 @@ Create these repository secrets in `Settings -> Secrets and variables -> Actions
 |-------------|-------------|
 | `EMAIL` | Sender Gmail address |
 | `PASSWORD` | Gmail App Password |
-| `TO_EMAIL` | Recipient email address |
+| `TO_EMAIL` | Recipient email address or comma-separated email addresses |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token from BotFather |
 | `TELEGRAM_CHAT_ID` | Telegram chat ID or comma-separated chat IDs |
 | `DISCORD_BOT_TOKEN` | Discord bot token from the Developer Portal |
@@ -135,7 +135,7 @@ Then fill `secrets.json` with your local values:
   "email": {
     "email": "you@gmail.com",
     "password": "your-app-password",
-    "to_email": "recipient@example.com"
+    "to_email": "first@example.com,second@example.com"
   },
   "telegram": {
     "bot_token": "123456:telegram-bot-token",
@@ -148,7 +148,7 @@ Then fill `secrets.json` with your local values:
 }
 ```
 
-Both Telegram and Discord support multiple targets separated by commas.
+Email, Telegram, and Discord all support multiple targets separated by commas. Email delivery is capped at 30 recipients per run.
 
 ---
 
@@ -222,7 +222,7 @@ If you want to run with custom environment variables locally:
 ```powershell
 $env:EMAIL="you@gmail.com"
 $env:PASSWORD="your-app-password"
-$env:TO_EMAIL="recipient@example.com"
+$env:TO_EMAIL="first@example.com,second@example.com"
 $env:TELEGRAM_BOT_TOKEN="123456:telegram-bot-token"
 $env:TELEGRAM_CHAT_ID="123456789"
 $env:DISCORD_BOT_TOKEN="your-discord-bot-token"

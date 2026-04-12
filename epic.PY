@@ -308,19 +308,20 @@ def send_email(subject, html):
     if not CONFIG["notifications"]["email"]:
         return
 
-    if not EMAIL or not PASSWORD or not TO_EMAIL:
+    recipients = parse_csv_values(TO_EMAIL)[:30]
+    if not EMAIL or not PASSWORD or not recipients:
         return
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = EMAIL
-    msg["To"] = TO_EMAIL
+    msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(html, "html"))
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
         server.starttls()
         server.login(EMAIL, PASSWORD)
-        server.send_message(msg)
+        server.sendmail(EMAIL, recipients, msg.as_string())
 
 
 def build_telegram_summary(current_games, upcoming_games):
