@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **13 Apr 2026, 06:51 PM IST**  
+Last updated: **14 Apr 2026, 12:41 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -23,8 +23,7 @@ Source: Epic fallback from saved state, Steam live data
 - **The Stone of Madness** - starts `16 Apr 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/the-stone-of-madness-7b22f3))
 
 ### Steam
-- **Graveyard Keeper** - Free to Keep ([Open](https://store.steampowered.com/app/599140/Graveyard_Keeper/?snr=1_7_7_2300_150_1))
-- **LivingForest** - Free to Keep ([Open](https://store.steampowered.com/app/3027490/LivingForest/?snr=1_7_7_2300_150_1))
+- No Steam freebies found.
 <!-- README_AUTO_SECTION:END -->
 
 ---
