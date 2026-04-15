@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **15 Apr 2026, 06:50 PM IST**  
+Last updated: **16 Apr 2026, 12:43 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -23,7 +23,7 @@ Source: Epic fallback from saved state, Steam live data
 - **The Stone of Madness** - starts `16 Apr 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/the-stone-of-madness-7b22f3))
 
 ### Steam
-- No Steam freebies found.
+- **NineHells** - Free to Keep ([Open](https://store.steampowered.com/app/2860410/NineHells/?snr=1_7_7_2300_150_1))
 <!-- README_AUTO_SECTION:END -->
 
 ---
