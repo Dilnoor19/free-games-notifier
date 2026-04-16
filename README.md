@@ -12,18 +12,22 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **16 Apr 2026, 06:54 PM IST**  
+Last updated: **17 Apr 2026, 12:39 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
-- **Prop Sumo** - free until `16 Apr 2026, 08:30 PM IST` ([Claim](https://store.epicgames.com/en-US/p/propsumo-ca8bd7))
-- **TOMAK: Save the Earth Regeneration** - free until `16 Apr 2026, 08:30 PM IST` ([Claim](https://store.epicgames.com/en-US/p/tomak-save-the-earth-regeneration-c1207c))
+- **The Stone of Madness** - free until `23 Apr 2026, 08:30 PM IST` ([Claim](https://store.epicgames.com/en-US/p/the-stone-of-madness-7b22f3))
 
 ### Upcoming on Epic
-- **The Stone of Madness** - starts `16 Apr 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/the-stone-of-madness-7b22f3))
+- **DOOMBLADE** - starts `23 Apr 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/doomblade-afdf9a))
 
 ### Steam
+- **Cthulhu: The Cosmic Abyss - Sanity Skin Pack** - Free to Keep ([Open](https://store.steampowered.com/app/4277070/Cthulhu_The_Cosmic_Abyss__Sanity_Skin_Pack/?snr=1_7_7_2300_150_1))
+- **Football Manager 26** - Free Weekend ([Open](https://store.steampowered.com/app/3551340))
+- **Legend of Keepers: Career of a Dungeon Manager** - Free to Keep ([Open](https://store.steampowered.com/app/978520/Legend_of_Keepers_Career_of_a_Dungeon_Manager/?snr=1_7_7_2300_150_1))
 - **NineHells** - Free to Keep ([Open](https://store.steampowered.com/app/2860410/NineHells/?snr=1_7_7_2300_150_1))
+- **Stickman Killing Zombie** - Free to Keep ([Open](https://store.steampowered.com/app/2792610/Stickman_Killing_Zombie/?snr=1_7_7_2300_150_1))
+- **Uncanny Tales: Cold Road** - Free to Keep ([Open](https://store.steampowered.com/app/3534240/Uncanny_Tales_Cold_Road/?snr=1_7_7_2300_150_1))
 <!-- README_AUTO_SECTION:END -->
 
 ---
