@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **19 Apr 2026, 06:27 PM IST**  
+Last updated: **20 Apr 2026, 12:15 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -26,7 +26,6 @@ Source: Epic fallback from saved state, Steam live data
 - **Football Manager 26** - Free Weekend ([Open](https://store.steampowered.com/app/3551340))
 - **Legend of Keepers: Career of a Dungeon Manager** - Free to Keep ([Open](https://store.steampowered.com/app/978520/Legend_of_Keepers_Career_of_a_Dungeon_Manager/?snr=1_7_7_2300_150_1))
 - **NineHells** - Free to Keep ([Open](https://store.steampowered.com/app/2860410/NineHells/?snr=1_7_7_2300_150_1))
-- **Stickman Killing Zombie** - Free to Keep ([Open](https://store.steampowered.com/app/2792610/Stickman_Killing_Zombie/?snr=1_7_7_2300_150_1))
 - **Uncanny Tales: Cold Road** - Free to Keep ([Open](https://store.steampowered.com/app/3534240/Uncanny_Tales_Cold_Road/?snr=1_7_7_2300_150_1))
 <!-- README_AUTO_SECTION:END -->
 
