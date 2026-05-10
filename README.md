@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **10 May 2026, 06:24 PM IST**  
+Last updated: **11 May 2026, 12:15 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -24,6 +24,7 @@ Source: Epic fallback from saved state, Steam live data
 - **Mystery Game 2** - starts `14 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
 
 ### Steam
+- **Just Move Fall Dungeon Endless Abyss** - Free to Keep ([Open](https://store.steampowered.com/app/3856040/Just_Move_Fall_Dungeon_Endless_Abyss/?snr=1_7_7_2300_150_1))
 - **LivingBattle** - Free to Keep ([Open](https://store.steampowered.com/app/3353830/LivingBattle/?snr=1_7_7_2300_150_1))
 <!-- README_AUTO_SECTION:END -->
 
