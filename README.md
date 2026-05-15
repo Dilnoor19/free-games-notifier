@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **15 May 2026, 06:59 PM IST**  
+Last updated: **16 May 2026, 12:46 AM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -24,6 +24,7 @@ Source: Epic fallback from saved state, Steam live data
 - **Mystery Game Week 21 Game 2** - starts `21 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
 
 ### Steam
+- **Dino running from a FURRY: GAMESFORFARM** - Free to Keep ([Open](https://store.steampowered.com/app/3343840/Dino_running_from_a_FURRY_GAMESFORFARM/?snr=1_7_7_2300_150_1))
 - **MISERY** - Free Weekend ([Open](https://store.steampowered.com/app/2119830))
 - **Terrors to Unveil - Day Off** - Free to Keep ([Open](https://store.steampowered.com/app/3587490/Terrors_to_Unveil__Day_Off/?snr=1_7_7_2300_150_1))
 - **V Rising** - Free Weekend ([Open](https://store.steampowered.com/app/1604030))
