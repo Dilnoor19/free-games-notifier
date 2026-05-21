@@ -1,6 +1,6 @@
 {
-  "signature": "CURRENT:Sunderfolk - Standard Edition,The Telltale Batman Shadows Edition|UPCOMING:Mystery Game Week 21 Game 1,Mystery Game Week 21 Game 2",
-  "updated_at": "2026-05-14T19:27:04.032995+00:00",
+  "signature": "CURRENT:Sunderfolk - Standard Edition,The Telltale Batman Shadows Edition|UPCOMING:Down in Bermuda,Mystery Game Week 22 Game 1,Mystery Game Week 22 Game 2,Tomb Raider I-III Remastered Starring Lara Croft",
+  "updated_at": "2026-05-21T14:39:40.527225+00:00",
   "current_games": [
     {
       "title": "Sunderfolk - Standard Edition",
@@ -19,16 +19,30 @@
   ],
   "upcoming_games": [
     {
-      "title": "Mystery Game Week 21 Game 1",
-      "image": "https://cdn1.epicgames.com/offer/d5241c76f178492ea1540fce45616757/image23_1920x1080-570394ae470a43859ce7366ea875532f",
-      "link": "https://store.epicgames.com/en-US/p/[]",
+      "title": "Down in Bermuda",
+      "image": "https://cdn1.epicgames.com/offer/d5241c76f178492ea1540fce45616757/Offer_wide_2560x1440-5314b15510b84a82971afea207658297",
+      "link": "https://store.epicgames.com/en-US/p/down-in-bermuda",
       "start": "21 May 2026, 08:30 PM IST",
       "end": "28 May 2026, 08:30 PM IST"
     },
     {
-      "title": "Mystery Game Week 21 Game 2",
+      "title": "Mystery Game Week 22 Game 1",
       "image": "https://cdn1.epicgames.com/offer/d5241c76f178492ea1540fce45616757/image23_1920x1080-570394ae470a43859ce7366ea875532f",
       "link": "https://store.epicgames.com/en-US/p/[]",
+      "start": "28 May 2026, 08:30 PM IST",
+      "end": "04 Jun 2026, 08:30 PM IST"
+    },
+    {
+      "title": "Mystery Game Week 22 Game 2",
+      "image": "https://cdn1.epicgames.com/offer/d5241c76f178492ea1540fce45616757/image23_1920x1080-570394ae470a43859ce7366ea875532f",
+      "link": "https://store.epicgames.com/en-US/p/[]",
+      "start": "28 May 2026, 08:30 PM IST",
+      "end": "04 Jun 2026, 08:30 PM IST"
+    },
+    {
+      "title": "Tomb Raider I-III Remastered Starring Lara Croft",
+      "image": "https://cdn1.epicgames.com/offer/d5241c76f178492ea1540fce45616757/Wide_2560x1440-8d4d3759851d462299fc4c6cf13643b2",
+      "link": "https://store.epicgames.com/en-US/p/tomb-raider-iiii-remastered-538640",
       "start": "21 May 2026, 08:30 PM IST",
       "end": "28 May 2026, 08:30 PM IST"
     }

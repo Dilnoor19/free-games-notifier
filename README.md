@@ -12,7 +12,7 @@
 <!-- README_AUTO_SECTION:START -->
 ## Free Games Right Now
 
-Last updated: **21 May 2026, 02:25 PM IST**  
+Last updated: **21 May 2026, 08:09 PM IST**  
 Source: Epic fallback from saved state, Steam live data
 
 ### Epic Games
@@ -20,8 +20,10 @@ Source: Epic fallback from saved state, Steam live data
 - **The Telltale Batman Shadows Edition** - free until `21 May 2026, 08:30 PM IST` ([Claim](https://store.epicgames.com/en-US/p/the-telltale-batman))
 
 ### Upcoming on Epic
-- **Mystery Game Week 21 Game 1** - starts `21 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
-- **Mystery Game Week 21 Game 2** - starts `21 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
+- **Down in Bermuda** - starts `21 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/down-in-bermuda))
+- **Mystery Game Week 22 Game 1** - starts `28 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
+- **Mystery Game Week 22 Game 2** - starts `28 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/[]))
+- **Tomb Raider I-III Remastered Starring Lara Croft** - starts `21 May 2026, 08:30 PM IST` ([Store page](https://store.epicgames.com/en-US/p/tomb-raider-iiii-remastered-538640))
 
 ### Steam
 - **AquaDream Soundtrack** - Free to Keep ([Open](https://store.steampowered.com/app/3502050/AquaDream_Soundtrack/?snr=1_7_7_2300_150_1))
